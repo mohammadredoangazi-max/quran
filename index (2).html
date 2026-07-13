@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>সালাত ও কুরআন</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14231f;
+    --deep:#0f3d3a;
+    --deep2:#155048;
+    --gold:#c8992c;
+    --gold-soft:#e7c877;
+    --paper:#f6f2e7;
+    --paper2:#efe8d6;
+    --muted:#6e6455;
+    --line: rgba(20,35,31,0.12);
+    --white:#fffdf7;
+    --danger:#a3402f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family:'Noto Sans Bengali','Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:760px;margin:0 auto;padding:0 0 60px;}
+
+  /* ---- header / signature arch ---- */
+  .hero{
+    position:relative;
+    background: radial-gradient(120% 140% at 50% -10%, var(--deep2) 0%, var(--deep) 60%, #0a2a27 100%);
+    color: var(--white);
+    padding: 28px 20px 22px;
+    border-bottom: 3px solid var(--gold);
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(200,153,44,0.06) 0 2px, transparent 2px 26px),
+      repeating-linear-gradient(-45deg, rgba(200,153,44,0.06) 0 2px, transparent 2px 26px);
+    pointer-events:none;
+  }
+  .hero-top{display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;}
+  .brand{font-family:'Amiri',serif; font-size:26px; font-weight:700; letter-spacing:.5px;}
+  .brand small{display:block; font-family:'Noto Sans Bengali',sans-serif; font-size:12px; font-weight:400; color:var(--gold-soft); letter-spacing:1px; margin-top:2px;}
+  .loc-pill{
+    font-size:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18);
+    padding:6px 12px; border-radius:20px; cursor:pointer; color:var(--white);
+  }
+  .loc-pill:active{transform:scale(.97);}
+
+  /* day arc: signature element */
+  .arc-wrap{position:relative; z-index:1; margin-top:18px;}
+  .arc-caption{display:flex; justify-content:space-between; font-size:11px; color:var(--gold-soft); margin-bottom:2px; letter-spacing:.4px;}
+  svg.arc{width:100%; height:auto; display:block;}
+  .arc-dot{filter:drop-shadow(0 0 4px rgba(200,153,44,.8));}
+  .now-label{fill:var(--white); font-size:11px; font-family:'Noto Sans Bengali',sans-serif;}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex; gap:0; margin:18px 16px 0; background:var(--paper2); border-radius:14px; padding:4px; border:1px solid var(--line);}
+  .tab-btn{flex:1; padding:10px 8px; border:none; background:transparent; font-family:inherit; font-weight:600; font-size:14px; color:var(--muted); border-radius:10px; cursor:pointer;}
+  .tab-btn.active{background:var(--deep); color:var(--white);}
+
+  .panel{display:none; padding:18px 16px 0;}
+  .panel.active{display:block;}
+
+  /* ---- prayer cards ---- */
+  .countdown-box{
+    margin-top:14px; background:linear-gradient(135deg, var(--deep) 0%, var(--deep2) 100%); color:var(--white);
+    border-radius:16px; padding:16px 18px; text-align:center; border:1px solid rgba(200,153,44,0.4);
+  }
+  .cd-label{font-size:12px; color:var(--gold-soft); font-weight:600; letter-spacing:.3px;}
+  .cd-time{font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; margin-top:4px; letter-spacing:1px;}
+
+  .waqt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+  .waqt-card{
+    background:var(--white); border:1px solid var(--line); border-radius:14px; padding:12px 14px;
+    position:relative; overflow:hidden;
+  }
+  .waqt-card.current{border-color:var(--gold); box-shadow:0 0 0 2px rgba(200,153,44,.25) inset;}
+  .waqt-name{font-weight:700; font-size:15px; display:flex; align-items:center; gap:6px;}
+  .waqt-badge{font-size:10px; background:var(--gold); color:var(--deep); padding:2px 7px; border-radius:20px; font-weight:700;}
+  .waqt-time{font-size:20px; font-weight:800; color:var(--deep); margin-top:6px; font-variant-numeric:tabular-nums;}
+  .waqt-range{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  .sun-row{display:flex; gap:10px; margin-top:10px;}
+  .sun-card{flex:1; background:var(--paper2); border-radius:14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;}
+  .sun-card .l{font-size:12px; color:var(--muted); font-weight:600;}
+  .sun-card .t{font-size:16px; font-weight:800; color:var(--deep);}
+
+  .info-box{
+    margin-top:16px; background:#fff8e6; border:1px solid var(--gold-soft); border-radius:12px;
+    padding:12px 14px; font-size:12.5px; line-height:1.6; color:#4a3d1b;
+  }
+  .info-box b{color:#7a5b0a;}
+
+  .settings-row{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .settings-row input, .settings-row select{
+    flex:1; min-width:110px; padding:9px 10px; border-radius:10px; border:1px solid var(--line); font-family:inherit; font-size:13px; background:var(--white);
+  }
+  .btn{
+    background:var(--deep); color:var(--white); border:none; padding:9px 16px; border-radius:10px;
+    font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .btn.secondary{background:transparent; color:var(--deep); border:1px solid var(--deep);}
+  .btn:active{transform:scale(.98);}
+
+  .status{font-size:12px; color:var(--muted); margin-top:8px;}
+
+  /* ---- Quran panel ---- */
+  .search-bar{display:flex; gap:8px;}
+  .search-bar input{flex:1; padding:11px 14px; border-radius:12px; border:1px solid var(--line); font-family:inherit; font-size:14px; background:var(--white);}
+  .surah-list{margin-top:14px; display:flex; flex-direction:column; gap:8px; max-height:none;}
+  .surah-item{
+    display:flex; align-items:center; gap:12px; background:var(--white); border:1px solid var(--line);
+    padding:10px 12px; border-radius:12px; cursor:pointer;
+  }
+  .surah-item:active{background:var(--paper2);}
+  .surah-num{
+    width:32px; height:32px; border-radius:50%; background:var(--deep); color:var(--gold-soft);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;
+  }
+  .surah-meta{flex:1; min-width:0;}
+  .surah-name-bn{font-weight:700; font-size:14px;}
+  .surah-name-en{font-size:11px; color:var(--muted);}
+  .surah-name-ar{font-family:'Amiri',serif; font-size:18px; color:var(--deep); direction:rtl;}
+
+  .reader-header{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .back-btn{background:var(--paper2); border:none; border-radius:10px; padding:8px 12px; cursor:pointer; font-family:inherit; font-weight:600; font-size:13px; color:var(--deep);}
+  .reader-title{flex:1;}
+  .reader-title .bn{font-weight:700; font-size:16px;}
+  .reader-title .ar{font-family:'Amiri',serif; font-size:20px; color:var(--deep); direction:rtl;}
+
+  .toggle-row{display:flex; gap:8px; margin-bottom:12px;}
+  .toggle-chip{
+    font-size:12px; padding:6px 12px; border-radius:20px; border:1px solid var(--line); background:var(--white); cursor:pointer; font-weight:600; color:var(--muted);
+  }
+  .toggle-chip.on{background:var(--deep); color:var(--white); border-color:var(--deep);}
+
+  .ayah{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:10px;}
+  .ayah-num{
+    display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+    background:var(--paper2); color:var(--deep); font-size:11px; font-weight:700; margin-bottom:8px;
+  }
+  .ayah-ar{font-family:'Amiri',serif; font-size:24px; line-height:2; direction:rtl; text-align:right; color:var(--ink);}
+  .ayah-bn{font-size:14px; line-height:1.8; color:#3a352c; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);}
+  .bookmark-btn{float:left; background:none; border:none; cursor:pointer; font-size:16px; opacity:.5;}
+  .bookmark-btn.on{opacity:1;}
+
+  .empty{text-align:center; padding:40px 20px; color:var(--muted); font-size:13px;}
+  .loading{text-align:center; padding:30px; color:var(--muted); font-size:13px;}
+
+  .search-results-tag{font-size:11px; color:var(--muted); margin:10px 0 6px;}
+
+  /* ---- FAQ accordion ---- */
+  .faq-item{background:var(--white); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .faq-q{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 14px;
+    cursor:pointer; font-weight:700; font-size:14px; line-height:1.5;
+  }
+  .faq-q .chev{transition:transform .2s; color:var(--gold); flex-shrink:0; font-size:14px;}
+  .faq-item.open .faq-q .chev{transform:rotate(180deg);}
+  .faq-a{display:none; padding:0 14px 15px; font-size:13.5px; line-height:1.8; color:#3a352c;}
+  .faq-item.open .faq-a{display:block;}
+  .faq-ref{
+    margin-top:10px; font-size:12px; color:var(--deep); background:var(--paper2); border-radius:10px;
+    padding:8px 10px; display:flex; gap:6px; align-items:flex-start;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-top">
+      <div class="brand">সালাত<small>নামাজের সময় ও পবিত্র কুরআন</small></div>
+      <button class="loc-pill" id="locBtn">📍 লোকেশন সেট করুন</button>
+    </div>
+    <div class="arc-wrap">
+      <div class="arc-caption"><span id="arcDate">--</span><span id="arcLoc">লোকেশন সেট করা হয়নি</span></div>
+      <svg class="arc" viewBox="0 0 320 90" id="dayArc"></svg>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="waqt">নামাজের সময়</button>
+    <button class="tab-btn" data-tab="quran">কুরআন</button>
+    <button class="tab-btn" data-tab="faq">সমাধান</button>
+  </div>
+
+  <!-- ================= PRAYER TIMES PANEL ================= -->
+  <div class="panel active" id="panel-waqt">
+    <div id="waqtStatus" class="status">লোকেশন সেট করুন প্রার্থনার সময় দেখতে।</div>
+    <div class="countdown-box" id="countdownBox" style="display:none;">
+      <div class="cd-label" id="cdLabel">পরবর্তী ওয়াক্ত</div>
+      <div class="cd-time" id="cdTime">--:--:--</div>
+    </div>
+    <div class="waqt-grid" id="waqtGrid"></div>
+    <div class="sun-row" id="sunRow"></div>
+
+    <div class="settings-row">
+      <select id="methodSelect">
+        <option value="1">কারাচি (দক্ষিণ এশিয়া)</option>
+        <option value="2">ISNA (উত্তর আমেরিকা)</option>
+        <option value="3">মুসলিম ওয়ার্ল্ড লীগ</option>
+        <option value="4">উম্মুল কুরা (মক্কা)</option>
+        <option value="5">মিশর</option>
+      </select>
+      <button class="btn secondary" id="refreshBtn">রিফ্রেশ</button>
+    </div>
+    <div class="settings-row">
+      <input type="text" id="cityInput" placeholder="শহরের নাম (যেমন Dhaka)">
+      <input type="text" id="countryInput" placeholder="দেশ (যেমন Bangladesh)">
+      <button class="btn" id="citySetBtn">শহর দিয়ে সেট করুন</button>
+    </div>
+
+    <div class="info-box">
+      <b>নোটিফিকেশন:</b> ওয়াক্ত শুরু হলে ব্রাউজার নোটিফিকেশন দেখাবে (অনুমতি দিলে)। <br><br>
+      <b>ফোন সাইলেন্ট করা প্রসঙ্গে:</b> নিরাপত্তার কারণে কোনো ওয়েব অ্যাপ বা ব্রাউজার সরাসরি ফোনের সাইলেন্ট/রিং মোড নিয়ন্ত্রণ করতে পারে না — এটা শুধুমাত্র বিশেষ অনুমতিপ্রাপ্ত নেটিভ অ্যাপ (Android/iOS) দিয়ে সম্ভব। এখানে বিকল্প হিসেবে জোরালো নোটিফিকেশন + শব্দ দেওয়া হয়েছে। সত্যিকারের অটো-সাইলেন্ট চাইলে Android-এ <b>Tasker/Macrodroid</b> বা iPhone-এ <b>Shortcuts Automation</b> দিয়ে এই ওয়েবসাইটের সময়ের সাথে যুক্ত করে বানানো যায়।<br><br>
+      <b>অফলাইন:</b> একবার সময় লোড হলে তা এই ডিভাইসে সংরক্ষিত থাকে, নেট না থাকলেও শেষবার লোড হওয়া সময় দেখা যাবে। নেট আসলে অটো নতুন করে লোড হয়ে যাবে।
+    </div>
+  </div>
+
+  <!-- ================= QURAN PANEL ================= -->
+  <div class="panel" id="panel-quran">
+    <div id="quranListView">
+      <div class="search-bar">
+        <input type="text" id="quranSearch" placeholder="আয়াত খুঁজুন (বাংলা বা বিষয়) ...">
+      </div>
+      <div id="searchResultsWrap"></div>
+      <div class="surah-list" id="surahList"><div class="loading">সূরার তালিকা লোড হচ্ছে...</div></div>
+    </div>
+
+    <div id="quranReaderView" style="display:none;">
+      <div class="reader-header">
+        <button class="back-btn" id="backToList">← তালিকা</button>
+        <div class="reader-title">
+          <div class="bn" id="readerNameBn"></div>
+        </div>
+        <div class="ar" id="readerNameAr"></div>
+      </div>
+      <div class="toggle-row">
+        <button class="toggle-chip on" id="toggleArabic">আরবি</button>
+        <button class="toggle-chip on" id="toggleBn">বাংলা অনুবাদ</button>
+      </div>
+      <div id="ayahList"><div class="loading">আয়াত লোড হচ্ছে...</div></div>
+    </div>
+  </div>
+
+  <!-- ================= FAQ / SOLUTIONS PANEL ================= -->
+  <div class="panel" id="panel-faq">
+    <div class="info-box" style="margin-top:0;">
+      এখানে দৈনন্দিন জীবনে নামাজ-সংক্রান্ত সাধারণ প্রশ্নের সংক্ষিপ্ত উত্তর কুরআন-হাদীসের সাধারণ রেফারেন্সসহ দেওয়া হলো। এটি সাধারণ (অধিকাংশ আলেমের মত অনুযায়ী) গাইডলাইন — নির্দিষ্ট মাযহাব বা জটিল পরিস্থিতিতে স্থানীয় আলেম/মুফতির পরামর্শ নেওয়াই উত্তম।
+    </div>
+    <div class="search-bar" style="margin-top:14px;">
+      <input type="text" id="faqSearch" placeholder="প্রশ্ন খুঁজুন...">
+    </div>
+    <div id="faqList" class="surah-list"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const WAQT_ORDER = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+  const WAQT_BN = {Fajr:'ফজর',Sunrise:'সূর্যোদয়',Dhuhr:'যোহর',Asr:'আসর',Maghrib:'মাগরিব',Isha:'এশা'};
+  let coords = null, cityLabel = null, timings = null, method = '1';
+  let notifiedFor = null;
+
+  // ---------- persistent storage (best-effort; may be unavailable offline) ----------
+  async function saveLocal(key, value){
+    try{ if(window.storage){ await window.storage.set(key, JSON.stringify(value), false); } }catch(e){}
+    try{ localStorage.setItem('salat_'+key, JSON.stringify(value)); }catch(e){}
+  }
+  async function loadLocal(key){
+    try{
+      if(window.storage){
+        const r = await window.storage.get(key, false);
+        if(r) return JSON.parse(r.value);
+      }
+    }catch(e){}
+    try{
+      const v = localStorage.getItem('salat_'+key);
+      if(v) return JSON.parse(v);
+    }catch(e){}
+    return null;
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      $('panel-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- location ----------
+  $('locBtn').addEventListener('click', ()=>{
+    if(!navigator.geolocation){ alert('এই ব্রাউজারে লোকেশন সাপোর্ট নেই।'); return; }
+    $('waqtStatus').textContent = 'লোকেশন খোঁজা হচ্ছে...';
+    navigator.geolocation.getCurrentPosition(async (pos)=>{
+      coords = {lat:pos.coords.latitude, lon:pos.coords.longitude};
+      cityLabel = 'আপনার বর্তমান অবস্থান';
+      await saveLocal('coords', coords);
+      await saveLocal('cityLabel', cityLabel);
+      fetchTimings();
+    }, (err)=>{
+      $('waqtStatus').textContent = 'লোকেশন পাওয়া যায়নি। নিচে শহরের নাম দিয়ে সেট করুন।';
+    }, {timeout:10000});
+  });
+
+  $('citySetBtn').addEventListener('click', async ()=>{
+    const city = $('cityInput').value.trim();
+    const country = $('countryInput').value.trim();
+    if(!city || !country){ alert('শহর ও দেশ দুটোই লিখুন।'); return; }
+    cityLabel = city + ', ' + country;
+    coords = null;
+    await saveLocal('city', city);
+    await saveLocal('country', country);
+    await saveLocal('cityLabel', cityLabel);
+    await saveLocal('coords', null);
+    fetchTimings();
+  });
+
+  $('methodSelect').addEventListener('change', (e)=>{ method = e.target.value; saveLocal('method', method); fetchTimings(); });
+  $('refreshBtn').addEventListener('click', fetchTimings);
+
+  async function fetchTimings(){
+    $('waqtStatus').textContent = 'সময়সূচি লোড হচ্ছে...';
+    $('arcLoc').textContent = cityLabel || 'লোকেশন সেট করা হয়নি';
+    try{
+      let url;
+      if(coords){
+        url = `https://api.aladhan.com/v1/timings/${Math.floor(Date.now()/1000)}?latitude=${coords.lat}&longitude=${coords.lon}&method=${method}`;
+      } else {
+        const city = await loadLocal('city');
+        const country = await loadLocal('country');
+        if(!city || !country) throw new Error('no-location');
+        url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}`;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+      if(data.code !== 200) throw new Error('api-error');
+      timings = data.timings;
+      await saveLocal('timings', timings);
+      await saveLocal('timingsDate', new Date().toDateString());
+      renderTimings();
+      $('waqtStatus').textContent = '✅ সর্বশেষ সময়সূচি (' + (cityLabel||'') + ')';
+    }catch(e){
+      const cached = await loadLocal('timings');
+      const cachedDate = await loadLocal('timingsDate');
+      if(cached){
+        timings = cached;
+        renderTimings();
+        $('waqtStatus').textContent = '⚠️ নেট সংযোগ নেই — সংরক্ষিত সময়সূচি দেখানো হচ্ছে (' + (cachedDate||'') + ')';
+      } else {
+        $('waqtStatus').textContent = 'সময়সূচি আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন অথবা লোকেশন সেট করুন।';
+      }
+    }
+  }
+
+  function to12(t){
+    if(!t) return '--:--';
+    t = t.split(' ')[0];
+    let [h,m] = t.split(':').map(Number);
+    const ampm = h>=12 ? 'PM':'AM';
+    h = h%12; if(h===0) h=12;
+    return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+  function toMinutes(t){
+    if(!t) return null;
+    t = t.split(' ')[0];
+    let [h,m] = t.split(':').map(Number);
+    return h*60+m;
+  }
+
+  function renderTimings(){
+    if(!timings) return;
+    $('arcDate').textContent = new Date().toLocaleDateString('bn-BD', {day:'numeric', month:'long', year:'numeric'});
+    const nowMin = new Date().getHours()*60 + new Date().getMinutes();
+
+    // determine current waqt (Fajr..Isha loop) & its end
+    const order = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+    let currentKey = 'Isha';
+    for(let i=0;i<order.length;i++){
+      const startMin = toMinutes(timings[order[i]]);
+      const nextStart = i<order.length-1 ? toMinutes(timings[order[i+1]]) : (toMinutes(timings['Fajr'])+24*60);
+      if(nowMin >= startMin && nowMin < nextStart){ currentKey = order[i]; break; }
+      if(nowMin < toMinutes(timings['Fajr'])){ currentKey='Isha'; }
+    }
+
+    const cardOrder = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    let html = '';
+    cardOrder.forEach((k,i)=>{
+      const nextIdx = order.indexOf(k)+1;
+      const endKey = nextIdx < order.length ? order[nextIdx] : 'Fajr';
+      const endLabel = endKey==='Fajr' ? 'পরদিন ফজর' : WAQT_BN[endKey];
+      const isCurrent = (k===currentKey);
+      html += `<div class="waqt-card ${isCurrent?'current':''}">
+        <div class="waqt-name">${WAQT_BN[k]} ${isCurrent?'<span class="waqt-badge">চলছে</span>':''}</div>
+        <div class="waqt-time">${to12(timings[k])}</div>
+        <div class="waqt-range">শেষ: ${to12(timings[endKey])} (${endLabel})</div>
+      </div>`;
+    });
+    $('waqtGrid').innerHTML = html;
+
+    $('sunRow').innerHTML = `
+      <div class="sun-card"><span class="l">🌅 সূর্যোদয়</span><span class="t">${to12(timings.Sunrise)}</span></div>
+      <div class="sun-card"><span class="l">🌇 সূর্যাস্ত</span><span class="t">${to12(timings.Sunset||timings.Maghrib)}</span></div>
+    `;
+
+    drawArc(order, nowMin);
+    maybeNotify(order, nowMin);
+    updateCountdown();
+  }
+
+  function drawArc(order, nowMin){
+    const w=320,h=90;
+    const dayStart = toMinutes(timings.Fajr)-30, dayEnd = toMinutes(timings.Isha)+60;
+    const span = dayEnd-dayStart;
+    const pad=20;
+    function xFor(min){ return pad + ( (min-dayStart)/span ) * (w-2*pad); }
+    const cy = 70, r=55;
+    function arcY(x){
+      const t = (x-pad)/(w-2*pad);
+      return cy - Math.sin(t*Math.PI)*r*0.55;
+    }
+    let dots='';
+    order.forEach(k=>{
+      const min = toMinutes(timings[k]);
+      const x = xFor(min); const y = arcY(x);
+      dots += `<circle class="arc-dot" cx="${x}" cy="${y}" r="3.2" fill="#e7c877" stroke="#0f3d3a" stroke-width="1"/>
+      <text x="${x}" y="${y-8}" text-anchor="middle" font-size="8" fill="#e7c877" font-family="Noto Sans Bengali">${WAQT_BN[k]}</text>`;
+    });
+    const nowX = xFor(Math.max(dayStart,Math.min(dayEnd,nowMin)));
+    const nowY = arcY(nowX);
+    const path = `M ${pad} ${cy} Q ${w/2} ${cy - r} ${w-pad} ${cy}`;
+    const svg = `
+      <path d="${path}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+      ${dots}
+      <circle cx="${nowX}" cy="${nowY}" r="5" fill="#fffdf7"/>
+      <line x1="${nowX}" y1="${nowY}" x2="${nowX}" y2="${cy+10}" stroke="#fffdf7" stroke-width="1" stroke-dasharray="2,2"/>
+    `;
+    $('dayArc').innerHTML = svg;
+  }
+
+  function maybeNotify(order, nowMin){
+    order.forEach(k=>{
+      if(k==='Sunrise') return;
+      const t = toMinutes(timings[k]);
+      const key = k + '-' + new Date().toDateString();
+      if(Math.abs(nowMin - t) <= 1 && notifiedFor !== key){
+        notifiedFor = key;
+        if('Notification' in window && Notification.permission === 'granted'){
+          new Notification('🕌 ' + WAQT_BN[k] + ' ওয়াক্ত শুরু হয়েছে', {body:'নামাজের সময় হয়েছে — ' + to12(timings[k]), icon:''});
+        }
+      }
+    });
+  }
+
+  if('Notification' in window && Notification.permission === 'default'){
+    setTimeout(()=>{ Notification.requestPermission(); }, 1500);
+  }
+
+  // ---------- init location/timings from cache ----------
+  async function init(){
+    const savedCoords = await loadLocal('coords');
+    const savedLabel = await loadLocal('cityLabel');
+    const savedMethod = await loadLocal('method');
+    if(savedMethod){ method = savedMethod; $('methodSelect').value = savedMethod; }
+    if(savedCoords){ coords = savedCoords; cityLabel = savedLabel; fetchTimings(); }
+    else if(savedLabel){ cityLabel = savedLabel; fetchTimings(); }
+    else {
+      const cached = await loadLocal('timings');
+      if(cached){ timings = cached; renderTimings(); $('waqtStatus').textContent='⚠️ সংরক্ষিত সময়সূচি দেখানো হচ্ছে — লোকেশন সেট করে হালনাগাদ করুন।'; }
+    }
+  }
+  init();
+  setInterval(()=>{ if(timings) renderTimings(); }, 20000);
+  setInterval(updateCountdown, 1000);
+
+  function updateCountdown(){
+    if(!timings){ $('countdownBox').style.display='none'; return; }
+    const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    const now = new Date();
+    const nowMs = now.getTime();
+    let best = null;
+    order.forEach(k=>{
+      const min = toMinutes(timings[k]);
+      if(min==null) return;
+      let target = new Date(now); target.setHours(Math.floor(min/60), min%60, 0, 0);
+      if(target.getTime() <= nowMs){ target.setDate(target.getDate()+1); }
+      if(!best || target.getTime() < best.time){ best = {key:k, time:target.getTime()}; }
+    });
+    if(!best){ $('countdownBox').style.display='none'; return; }
+    $('countdownBox').style.display='block';
+    const diff = Math.max(0, best.time - nowMs);
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+    $('cdLabel').textContent = WAQT_BN[best.key] + ' শুরু হতে বাকি';
+    $('cdTime').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  // ================= QURAN =================
+  const SURAH_BN_NAMES = ["আল-ফাতিহা","আল-বাকারা","আলে-ইমরান","আন-নিসা","আল-মায়িদা","আল-আন'আম","আল-আরাফ","আল-আনফাল","আত-তওবা","ইউনুস","হুদ","ইউসুফ","আর-রাদ","ইব্রাহীম","আল-হিজর","আন-নাহল","আল-ইসরা","আল-কাহফ","মারইয়াম","ত্বা-হা","আল-আম্বিয়া","আল-হাজ্জ","আল-মুমিনূন","আন-নূর","আল-ফুরকান","আশ-শুআরা","আন-নামল","আল-কাসাস","আল-আনকাবুত","আর-রুম","লুকমান","আস-সাজদা","আল-আহযাব","সাবা","ফাতির","ইয়াসীন","আস-সাফফাত","সোয়াদ","আয-যুমার","গাফির","হা-মীম সাজদা","আশ-শূরা","আয-যুখরুফ","আদ-দুখান","আল-জাসিয়া","আল-আহকাফ","মুহাম্মদ","আল-ফাতহ","আল-হুজুরাত","ক্বাফ","আয-যারিয়াত","আত-তূর","আন-নাজম","আল-কামার","আর-রহমান","আল-ওয়াকিয়া","আল-হাদীদ","আল-মুজাদালা","আল-হাশর","আল-মুমতাহিনা","আস-সফ","আল-জুমুআ","আল-মুনাফিকুন","আত-তাগাবুন","আত-তালাক","আত-তাহরীম","আল-মুলক","আল-কলম","আল-হাক্কাহ","আল-মাআরিজ","নূহ","আল-জিন","আল-মুয্যাম্মিল","আল-মুদ্দাসসির","আল-কিয়ামাহ","আল-ইনসান","আল-মুরসালাত","আন-নাবা","আন-নাযিআত","আবাসা","আত-তাকভীর","আল-ইনফিতার","আল-মুতাফফিফীন","আল-ইনশিকাক","আল-বুরূজ","আত-তারিক","আল-আ'লা","আল-গাশিয়া","আল-ফজর","আল-বালাদ","আশ-শামস","আল-লাইল","আদ-দুহা","আশ-শারহ","আত-তীন","আল-আলাক","আল-কদর","আল-বাইয়্যিনাহ","আয-যিলযাল","আল-আদিয়াত","আল-কারিয়াহ","আত-তাকাসুর","আল-আসর","আল-হুমাযাহ","আল-ফীল","কুরাইশ","আল-মাউন","আল-কাউসার","আল-কাফিরূন","আন-নাসর","আল-মাসাদ","আল-ইখলাস","আল-ফালাক","আন-নাস"];
+
+  let surahsMeta = [];
+  async function loadSurahList(){
+    let cached = await loadLocal('surahList');
+    if(cached && cached.length===114){ surahsMeta = cached; renderSurahList(surahsMeta); }
+    try{
+      const res = await fetch('https://api.alquran.cloud/v1/surah');
+      const data = await res.json();
+      surahsMeta = data.data;
+      await saveLocal('surahList', surahsMeta);
+      renderSurahList(surahsMeta);
+    }catch(e){
+      if(!cached){ $('surahList').innerHTML = '<div class="empty">তালিকা লোড করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।</div>'; }
+    }
+  }
+  function renderSurahList(list){
+    $('surahList').innerHTML = list.map(s=>`
+      <div class="surah-item" data-n="${s.number}">
+        <div class="surah-num">${s.number}</div>
+        <div class="surah-meta">
+          <div class="surah-name-bn">${SURAH_BN_NAMES[s.number-1]||s.englishName}</div>
+          <div class="surah-name-en">${s.englishName} · ${s.englishNameTranslation} · ${s.numberOfAyahs} আয়াত</div>
+        </div>
+        <div class="surah-name-ar">${s.name}</div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.surah-item').forEach(el=>{
+      el.addEventListener('click', ()=> openSurah(parseInt(el.dataset.n)));
+    });
+  }
+  loadSurahList();
+
+  let showArabic = true, showBn = true;
+  $('toggleArabic').addEventListener('click', ()=>{ showArabic=!showArabic; $('toggleArabic').classList.toggle('on'); document.querySelectorAll('.ayah-ar').forEach(e=>e.style.display = showArabic?'block':'none'); });
+  $('toggleBn').addEventListener('click', ()=>{ showBn=!showBn; $('toggleBn').classList.toggle('on'); document.querySelectorAll('.ayah-bn').forEach(e=>e.style.display = showBn?'block':'none'); });
+
+  $('backToList').addEventListener('click', ()=>{
+    $('quranReaderView').style.display='none';
+    $('quranListView').style.display='block';
+  });
+
+  async function openSurah(n){
+    $('quranListView').style.display='none';
+    $('quranReaderView').style.display='block';
+    $('ayahList').innerHTML = '<div class="loading">আয়াত লোড হচ্ছে...</div>';
+    const meta = surahsMeta.find(s=>s.number===n);
+    $('readerNameBn').textContent = (SURAH_BN_NAMES[n-1]||meta?.englishName||'') + ' (' + (meta?meta.numberOfAyahs:'') + ' আয়াত)';
+    $('readerNameAr').textContent = meta ? meta.name : '';
+    await saveLocal('lastRead', {n});
+
+    const cacheKey = 'surah_'+n;
+    let data = await loadLocal(cacheKey);
+    if(!data){
+      try{
+        const [arRes, bnRes] = await Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${n}/quran-uthmani`),
+          fetch(`https://api.alquran.cloud/v1/surah/${n}/bn.bengali`)
+        ]);
+        const ar = await arRes.json(); const bn = await bnRes.json();
+        data = {ar: ar.data.ayahs, bn: bn.data.ayahs};
+        await saveLocal(cacheKey, data);
+      }catch(e){
+        $('ayahList').innerHTML = '<div class="empty">ইন্টারনেট সংযোগ নেই এবং এই সূরাটি সংরক্ষিত নেই। সংযোগ পেলে আবার চেষ্টা করুন।</div>';
+        return;
+      }
+    }
+    renderAyahs(data);
+  }
+
+  async function renderAyahs(data){
+    const bookmarks = (await loadLocal('bookmarks')) || {};
+    $('ayahList').innerHTML = data.ar.map((a,i)=>{
+      const bn = data.bn[i]?.text || '';
+      const bmKey = a.surah ? (a.surah.number+':'+a.numberInSurah) : (''+a.numberInSurah);
+      const isBm = !!bookmarks[bmKey];
+      return `<div class="ayah">
+        <button class="bookmark-btn ${isBm?'on':''}" data-key="${bmKey}">${isBm?'★':'☆'}</button>
+        <div class="ayah-num">${a.numberInSurah}</div>
+        <div class="ayah-ar" style="display:${showArabic?'block':'none'}">${a.text}</div>
+        <div class="ayah-bn" style="display:${showBn?'block':'none'}">${bn}</div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.bookmark-btn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const bookmarks = (await loadLocal('bookmarks')) || {};
+        const key = btn.dataset.key;
+        if(bookmarks[key]){ delete bookmarks[key]; btn.classList.remove('on'); btn.textContent='☆'; }
+        else{ bookmarks[key]=true; btn.classList.add('on'); btn.textContent='★'; }
+        await saveLocal('bookmarks', bookmarks);
+      });
+    });
+  }
+
+  // search
+  let searchTimer=null;
+  $('quranSearch').addEventListener('input', (e)=>{
+    clearTimeout(searchTimer);
+    const q = e.target.value.trim();
+    if(q.length<2){ $('searchResultsWrap').innerHTML=''; $('surahList').style.display='flex'; return; }
+    searchTimer = setTimeout(()=>doSearch(q), 500);
+  });
+  async function doSearch(q){
+    $('surahList').style.display='none';
+    $('searchResultsWrap').innerHTML = '<div class="loading">খোঁজা হচ্ছে...</div>';
+    try{
+      const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(q)}/all/bn.bengali`);
+      const data = await res.json();
+      if(data.code!==200 || !data.data || !data.data.matches || data.data.matches.length===0){
+        $('searchResultsWrap').innerHTML = '<div class="empty">কোনো আয়াত পাওয়া যায়নি।</div>';
+        return;
+      }
+      const matches = data.data.matches.slice(0,30);
+      $('searchResultsWrap').innerHTML = `<div class="search-results-tag">${data.data.count} টি ফলাফল পাওয়া গেছে</div>` +
+        matches.map(m=>`
+          <div class="ayah" style="cursor:pointer" data-surah="${m.surah.number}">
+            <div class="ayah-num">${m.surah.number}:${m.numberInSurah}</div>
+            <div class="ayah-bn" style="border:none; padding:0; margin:0;">${m.text}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">${SURAH_BN_NAMES[m.surah.number-1]||m.surah.englishName}</div>
+          </div>
+        `).join('');
+      document.querySelectorAll('#searchResultsWrap .ayah').forEach(el=>{
+        el.addEventListener('click', ()=> openSurah(parseInt(el.dataset.surah)));
+      });
+    }catch(e){
+      $('searchResultsWrap').innerHTML = '<div class="empty">ইন্টারনেট সংযোগ ছাড়া খোঁজা যাবে না।</div>';
+    }
+  }
+
+  // ================= FAQ / SOLUTIONS =================
+  const FAQ_DATA = [
+    {
+      q: 'নামাজের মধ্যে ওযু ভেঙে গেলে করণীয় কী?',
+      a: 'নামাজের মধ্যে ওযু ভেঙে গেলে (বায়ু নির্গত হওয়া, ঘুমিয়ে পড়া ইত্যাদি) নামাজ বাতিল হয়ে যায়। নতুন করে ওযু করে আবার শুরু থেকে নামাজ পড়তে হবে, কারণ পবিত্র থাকা নামাজের অপরিহার্য শর্ত।',
+      ref: 'কুরআন — সূরা আল-মায়িদা ৫:৬ (ওযুর নির্দেশ)। সহীহ বুখারী ও সহীহ মুসলিমে পবিত্রতা ছাড়া নামাজ কবুল না হওয়া সংক্রান্ত হাদীস বর্ণিত আছে।'
+    },
+    {
+      q: 'নামাজে রাকাত সংখ্যা ভুলে গেলে বা সন্দেহ হলে কী করব?',
+      a: 'যে সংখ্যায় বেশি নিশ্চিত মনে হয় সেটা ধরে নামাজ শেষ করতে হবে, তারপর সালামের আগে বা পরে সাহু সিজদা (ভুলের সিজদা) দিতে হবে।',
+      ref: 'সহীহ বুখারী ও সহীহ মুসলিমে সাহু সিজদা সংক্রান্ত একাধিক হাদীস বর্ণিত আছে।'
+    },
+    {
+      q: 'ঘুমিয়ে বা ভুলে একটি ওয়াক্তের নামাজ ছুটে গেলে কী করব?',
+      a: 'যত দ্রুত সম্ভব স্মরণ হওয়া মাত্র বা জেগে ওঠার সাথে সাথে কাযা আদায় করে নিতে হবে। ইচ্ছাকৃত না হলে এতে গুনাহ হয় না, তবে দেরি করা উচিত না।',
+      ref: 'সহীহ মুসলিমে বর্ণিত, নবী (সা.) বলেছেন — ঘুম বা ভুলে ছুটে যাওয়া নামাজের কাফফারা হলো স্মরণ হওয়া মাত্র তা আদায় করা।'
+    },
+    {
+      q: 'সফরে (ভ্রমণে) নামাজ কীভাবে পড়তে হবে?',
+      a: 'নির্দিষ্ট দূরত্বের সফরে ৪ রাকাতবিশিষ্ট নামাজ (যোহর, আসর, এশা) কসর করে ২ রাকাত পড়া যায়। ফজর ও মাগরিব পূর্ণই পড়তে হয়।',
+      ref: 'কুরআন — সূরা আন-নিসা ৪:১০১।'
+    },
+    {
+      q: 'পানি না থাকলে বা অসুস্থতার কারণে ওযু করতে না পারলে কী করব?',
+      a: 'পবিত্র মাটি বা বালিতে হাত মেরে মুখমণ্ডল ও দুই হাত মাসাহ করে তায়াম্মুম করা যাবে, এতে ওযুর বদলে নামাজ পড়া বৈধ হয়।',
+      ref: 'কুরআন — সূরা আল-মায়িদা ৫:৬ ও সূরা আন-নিসা ৪:৪৩।'
+    },
+    {
+      q: 'নামাজরত অবস্থায় কাপড় বা জুতায় নাপাকি আছে বুঝতে পারলে কী করব?',
+      a: 'সম্ভব হলে নামাজ ভাঙতে হবে না — নাপাক অংশ (যেমন জুতা) খুলে ফেলে বা কাপড় ঠিক করে নামাজ চালিয়ে যাওয়া যায়।',
+      ref: 'সুনানে আবু দাউদে বর্ণিত, নবী (সা.) নামাজরত অবস্থায় জুতায় নাপাকি বুঝতে পেরে তা খুলে ফেলে নামাজ চালিয়ে গিয়েছিলেন।'
+    },
+    {
+      q: 'মহিলাদের ঋতুস্রাব (হায়েজ) চলাকালীন নামাজের বিধান কী?',
+      a: 'এই সময়ে নামাজ পড়া মাফ, এবং পরবর্তীতে এই ছুটে যাওয়া নামাজের কাযাও পড়তে হয় না। পবিত্র হওয়ার পর থেকেই নামাজ শুরু করবেন।',
+      ref: 'সহীহ বুখারী।'
+    },
+    {
+      q: 'জামাতে দেরি হয়ে ইমাম রুকু বা পরবর্তী রাকাতে চলে গেলে কী করব?',
+      a: 'যতটুকু অবস্থায় পাওয়া যায় সেভাবেই ইমামের সাথে শরিক হয়ে যেতে হবে, তারপর ইমামের সালামের পর নিজের বাকি রাকাত(গুলো) একা পূর্ণ করে নিতে হবে।',
+      ref: 'সহীহ বুখারী।'
+    },
+    {
+      q: 'নামাজে মনোযোগ নষ্ট হয়ে বারবার সন্দেহ/ওয়াসওয়াসা আসলে কী করব?',
+      a: 'এই ধরনের কুমন্ত্রণাকে উপেক্ষা করে নামাজ চালিয়ে যেতে হবে — এতে নামাজ নষ্ট হয় না। সন্দেহ এলে বাম দিকে হালকা থুতু ফেলার ভঙ্গি করে (শব্দ ছাড়া) আউজুবিল্লাহ পড়ার পরামর্শ হাদীসে এসেছে।',
+      ref: 'সহীহ মুসলিম।'
+    },
+    {
+      q: 'অসুস্থতার কারণে দাঁড়িয়ে নামাজ পড়তে না পারলে কী করব?',
+      a: 'দাঁড়াতে না পারলে বসে, বসতে না পারলে কাত হয়ে শুয়ে ইশারায়, এমনকি চোখের ইশারায়ও নামাজ আদায় করা যাবে — শারীরিক সামর্থ্য অনুযায়ী।',
+      ref: 'সহীহ বুখারীতে ইমরান ইবনে হুসাইন (রা.) এর হাদীসে এই নির্দেশনা এসেছে।'
+    },
+    {
+      q: 'জুমার নামাজ ছুটে গেলে কী করব?',
+      a: 'জুমার নামাজের কোনো কাযা নেই। এর পরিবর্তে যোহরের ৪ রাকাত ফরজ নামাজ পড়ে নিতে হবে।',
+      ref: 'ফিকহের সাধারণ (ইজমা ভিত্তিক) বিধান।'
+    },
+    {
+      q: 'নামাজে সিজদার সময় কপাল মাটিতে ঠিকভাবে না লাগলে?',
+      a: 'কপাল (ও নাক) মাটিতে বা জায়নামাজে স্পর্শ করা সিজদার জন্য জরুরি — এটা ছাড়া সিজদা পূর্ণ হয় না। খেয়াল করে পরের সিজদায় ঠিক করে নিতে হবে; ভুলবশত একবার না হলে সাহু সিজদা দেওয়া যায়।',
+      ref: 'সহীহ বুখারী ও সহীহ মুসলিমে সাত অঙ্গে সিজদা করার নির্দেশ সংক্রান্ত হাদীস।'
+    },
+  ];
+
+  function renderFaq(list){
+    if(list.length===0){ $('faqList').innerHTML = '<div class="empty">কোনো প্রশ্ন পাওয়া যায়নি।</div>'; return; }
+    $('faqList').innerHTML = list.map((item,i)=>`
+      <div class="faq-item" data-i="${i}">
+        <div class="faq-q"><span>${item.q}</span><span class="chev">▾</span></div>
+        <div class="faq-a">${item.a}<div class="faq-ref">📖 <span>${item.ref}</span></div></div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.faq-item').forEach(el=>{
+      el.querySelector('.faq-q').addEventListener('click', ()=> el.classList.toggle('open'));
+    });
+  }
+  renderFaq(FAQ_DATA);
+  $('faqSearch').addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    if(!q){ renderFaq(FAQ_DATA); return; }
+    renderFaq(FAQ_DATA.filter(item => item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q)));
+  });
+})();
+</script>
+</body>
+</html>
