@@ -365,15 +365,13 @@
       }
       const res = await fetch(url);
       const data = await res.json();
-      if(data.code !== 200) throw new Error('api-error');
-      timings = data.timings;
+      if(data.code !== 200 || !data.data || !data.data.timings) throw new Error('api-error: ' + JSON.stringify(data).slice(0,200));
+      timings = data.data.timings;
       await saveLocal('timings', timings);
       await saveLocal('timingsDate', new Date().toDateString());
       try{
         renderTimings();
-        const gridChildren = document.getElementById('waqtGrid').children.length;
-        $('waqtStatus').innerHTML = '✅ সর্বশেষ সময়সূচি (' + (cityLabel||'') + ')' +
-          '<br><span style="opacity:.6">ডিবাগ — grid cards: ' + gridChildren + ' | timings: ' + JSON.stringify(timings) + '</span>';
+        $('waqtStatus').textContent = '✅ সর্বশেষ সময়সূচি (' + (cityLabel||'') + ')';
       }catch(renderErr){
         $('waqtStatus').textContent = '⚠️ সময় পাওয়া গেছে কিন্তু দেখাতে সমস্যা হচ্ছে: ' + renderErr.message;
       }
