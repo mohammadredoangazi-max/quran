@@ -34,7 +34,9 @@
   /* ---- header / signature arch ---- */
   .hero{
     position:relative;
-    background: radial-gradient(120% 140% at 50% -10%, var(--deep2) 0%, var(--deep) 60%, #0a2a27 100%);
+    background:
+      linear-gradient(180deg, rgba(9,26,23,0.45) 0%, rgba(9,26,23,0.78) 65%, rgba(9,26,23,0.92) 100%),
+      url('https://commons.wikimedia.org/wiki/Special:FilePath/Al-Kaaba_in_Mecca.jpg') center 60%/cover no-repeat;
     color: var(--white);
     padding: 28px 20px 22px;
     border-bottom: 3px solid var(--gold);
@@ -44,10 +46,11 @@
     content:"";
     position:absolute; inset:0;
     background-image:
-      repeating-linear-gradient(45deg, rgba(200,153,44,0.06) 0 2px, transparent 2px 26px),
-      repeating-linear-gradient(-45deg, rgba(200,153,44,0.06) 0 2px, transparent 2px 26px);
+      repeating-linear-gradient(45deg, rgba(200,153,44,0.05) 0 2px, transparent 2px 26px),
+      repeating-linear-gradient(-45deg, rgba(200,153,44,0.05) 0 2px, transparent 2px 26px);
     pointer-events:none;
   }
+  .photo-credit{position:absolute; right:10px; bottom:6px; font-size:9px; color:rgba(255,255,255,0.45); z-index:1;}
   .hero-top{display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;}
   .brand{font-family:'Amiri',serif; font-size:26px; font-weight:700; letter-spacing:.5px;}
   .brand small{display:block; font-family:'Noto Sans Bengali',sans-serif; font-size:12px; font-weight:400; color:var(--gold-soft); letter-spacing:1px; margin-top:2px;}
@@ -180,6 +183,7 @@
 <div class="app">
 
   <div class="hero">
+    <div class="photo-credit">ছবি: Wikimedia Commons (Public Domain)</div>
     <div class="hero-top">
       <div class="brand">সালাত<small>নামাজের সময় ও পবিত্র কুরআন</small></div>
       <button class="loc-pill" id="locBtn">📍 লোকেশন সেট করুন</button>
@@ -217,14 +221,14 @@
       <button class="btn secondary" id="refreshBtn">রিফ্রেশ</button>
     </div>
     <div class="settings-row">
-      <input type="text" id="cityInput" placeholder="শহরের নাম" value="Dhaka">
-      <input type="text" id="countryInput" placeholder="দেশ" value="Bangladesh">
+      <input type="text" id="cityInput" placeholder="শহরের নাম, যেমন: Dhaka">
+      <input type="text" id="countryInput" placeholder="দেশের নাম, যেমন: Bangladesh">
       <button class="btn" id="citySetBtn">শহর দিয়ে সেট করুন</button>
     </div>
 
     <div class="info-box">
       <b>নোটিফিকেশন:</b> ওয়াক্ত শুরু হলে ব্রাউজার নোটিফিকেশন দেখাবে (অনুমতি দিলে)। <br><br>
-      <b> কোন প্রকার কোন ভুল হলে জানিয়ে সাহায্য করুন,ধন্যবাদ।<br><br>
+      <b>ফোন সাইলেন্ট করা প্রসঙ্গে:</b> নিরাপত্তার কারণে কোনো ওয়েব অ্যাপ বা ব্রাউজার সরাসরি ফোনের সাইলেন্ট/রিং মোড নিয়ন্ত্রণ করতে পারে না — এটা শুধুমাত্র বিশেষ অনুমতিপ্রাপ্ত নেটিভ অ্যাপ (Android/iOS) দিয়ে সম্ভব। এখানে বিকল্প হিসেবে জোরালো নোটিফিকেশন + শব্দ দেওয়া হয়েছে। সত্যিকারের অটো-সাইলেন্ট চাইলে Android-এ <b>Tasker/Macrodroid</b> বা iPhone-এ <b>Shortcuts Automation</b> দিয়ে এই ওয়েবসাইটের সময়ের সাথে যুক্ত করে বানানো যায়।<br><br>
       <b>অফলাইন:</b> একবার সময় লোড হলে তা এই ডিভাইসে সংরক্ষিত থাকে, নেট না থাকলেও শেষবার লোড হওয়া সময় দেখা যাবে। নেট আসলে অটো নতুন করে লোড হয়ে যাবে।
     </div>
   </div>
@@ -355,8 +359,12 @@
       timings = data.timings;
       await saveLocal('timings', timings);
       await saveLocal('timingsDate', new Date().toDateString());
-      renderTimings();
-      $('waqtStatus').textContent = '✅ সর্বশেষ সময়সূচি (' + (cityLabel||'') + ')';
+      try{
+        renderTimings();
+        $('waqtStatus').textContent = '✅ সর্বশেষ সময়সূচি (' + (cityLabel||'') + ')';
+      }catch(renderErr){
+        $('waqtStatus').textContent = '⚠️ সময় পাওয়া গেছে কিন্তু দেখাতে সমস্যা হচ্ছে: ' + renderErr.message;
+      }
     }catch(e){
       const cached = await loadLocal('timings');
       const cachedDate = await loadLocal('timingsDate');
@@ -365,7 +373,7 @@
         renderTimings();
         $('waqtStatus').textContent = '⚠️ নেট সংযোগ নেই — সংরক্ষিত সময়সূচি দেখানো হচ্ছে (' + (cachedDate||'') + ')';
       } else {
-        $('waqtStatus').textContent = 'সময়সূচি আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন অথবা লোকেশন সেট করুন।';
+        $('waqtStatus').textContent = 'সময়সূচি আনা যায়নি। কারণ: ' + (e.message||e) + ' — এড-ব্লকার/এক্সটেনশন বন্ধ করে বা ইনকগনিটো মোডে চেষ্টা করুন।';
       }
     }
   }
@@ -527,7 +535,7 @@
       await saveLocal('surahList', surahsMeta);
       renderSurahList(surahsMeta);
     }catch(e){
-      if(!cached){ $('surahList').innerHTML = '<div class="empty">তালিকা লোড করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।</div>'; }
+      if(!cached){ $('surahList').innerHTML = '<div class="empty">তালিকা লোড করা যায়নি।<br><span style="font-size:11px;opacity:.7">কারণ: '+(e.message||e)+'</span><br><span style="font-size:11px;opacity:.7">এড-ব্লকার/এক্সটেনশন বন্ধ করে বা ইনকগনিটো মোডে চেষ্টা করুন।</span></div>'; }
     }
   }
   function renderSurahList(list){
@@ -613,7 +621,23 @@
   $('quranSearch').addEventListener('input', (e)=>{
     clearTimeout(searchTimer);
     const q = e.target.value.trim();
-    if(q.length<2){ $('searchResultsWrap').innerHTML=''; $('surahList').style.display='flex'; return; }
+    if(q.length<1){ $('searchResultsWrap').innerHTML=''; $('surahList').style.display='flex'; renderSurahList(surahsMeta); return; }
+
+    // first try matching surah name (bn / english / arabic) - instant, no API call
+    const qLower = q.toLowerCase();
+    const nameMatches = surahsMeta.filter(s=>{
+      const bn = SURAH_BN_NAMES[s.number-1]||'';
+      return bn.includes(q) || (s.englishName||'').toLowerCase().includes(qLower) || (s.englishNameTranslation||'').toLowerCase().includes(qLower) || (s.name||'').includes(q) || String(s.number)===q;
+    });
+    if(nameMatches.length>0){
+      $('searchResultsWrap').innerHTML = '';
+      $('surahList').style.display='flex';
+      renderSurahList(nameMatches);
+      return;
+    }
+    // no surah name matched -> fall back to searching ayah text (needs at least 2 chars)
+    $('surahList').style.display='none';
+    if(q.length<2){ $('searchResultsWrap').innerHTML=''; return; }
     searchTimer = setTimeout(()=>doSearch(q), 500);
   });
   async function doSearch(q){
